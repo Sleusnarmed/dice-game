@@ -7,7 +7,6 @@ public readonly struct Die
 {
     public int[] Faces { get; }
     public int FaceCount => Faces.Length;
-
     public Die(int[] faces)
     {
         Faces = faces;
@@ -50,24 +49,16 @@ public static class DiceParser
     private static int[] ParseDieString(string dieString)
     {
         var segments = dieString.Split(',');
-        var result = new int[segments.Length];
+        var faces = new int[segments.Length];
 
         for (int i = 0; i < segments.Length; i++)
         {
-            if (!int.TryParse(segments[i].AsSpan().Trim(), out var value))
-            {
-                throw new ArgumentException($"Invalid die format: '{dieString}'. Must be comma-separated integers (e.g., '1,2,3,4,5,6')");
-            }
-            if (value < 0)
-            {
+            if (!int.TryParse(segments[i].Trim(), out int val) || val < 0)
                 throw new ArgumentException(
-                    $"Negative face value: {value}\n" +
-                    "All faces must be non-negative. Example: '0,1,2'");
-            }
-
-            result[i] = value;
+                    $"Invalid face value: '{segments[i]}'. Must be non-negative integer");
+            faces[i] = val;
         }
-
-        return result;
+        return faces.Length == 0 ?
+            throw new ArgumentException("Empty dice atleast should be two dice must be provided with the same faces. Example: 1,2,3,4,5,6 7,8,9,10,11,12") : faces;
     }
 }
