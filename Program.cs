@@ -10,6 +10,7 @@ class Program
         try
         {
             var dice = DiceParser.ParseDice(args);
+            TableGeneration.DisplayDiceTable(dice);
         }
         catch (Exception ex)
         {

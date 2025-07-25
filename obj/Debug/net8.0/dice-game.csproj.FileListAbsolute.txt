@@ -12,3 +12,6 @@ C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\refint\dice-gam
 C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.pdb
 C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.genruntimeconfig.cache
 C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\ref\dice-game.dll
+C:\Users\ansal\Documents\dotnet-tests\dice-game\bin\Debug\net8.0\ConsoleTables.dll
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.csproj.AssemblyReference.cache
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.csproj.Up2Date
