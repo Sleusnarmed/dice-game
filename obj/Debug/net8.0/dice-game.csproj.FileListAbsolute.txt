@@ -1,0 +1,14 @@
+C:\Users\ansal\Documents\dotnet-tests\dice-game\bin\Debug\net8.0\dice-game.exe
+C:\Users\ansal\Documents\dotnet-tests\dice-game\bin\Debug\net8.0\dice-game.deps.json
+C:\Users\ansal\Documents\dotnet-tests\dice-game\bin\Debug\net8.0\dice-game.runtimeconfig.json
+C:\Users\ansal\Documents\dotnet-tests\dice-game\bin\Debug\net8.0\dice-game.dll
+C:\Users\ansal\Documents\dotnet-tests\dice-game\bin\Debug\net8.0\dice-game.pdb
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.AssemblyInfoInputs.cache
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.AssemblyInfo.cs
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.csproj.CoreCompileInputs.cache
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.dll
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\refint\dice-game.dll
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.pdb
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\dice-game.genruntimeconfig.cache
+C:\Users\ansal\Documents\dotnet-tests\dice-game\obj\Debug\net8.0\ref\dice-game.dll
