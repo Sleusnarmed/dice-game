@@ -1,67 +1,67 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ConsoleTables;
 
 namespace DiceGame.Utils;
 
 public static class TableGeneration
 {
-    private const int DefaultPageSize = 5;
-    private const int MaxColumnWidth = 15;
-    private const int MaxVisibleColumns = 8;
-    private const string DefaultProbability = "0.3333"; //Temporary - to be replaced
+    private const int PageSize = 5;
+    private const int VisibleCols = 5;
 
-    public static void DisplayDiceTable(List<Die> dice, int pageSize = DefaultPageSize)
+    public static void DisplayDiceTable(List<Die> dice, int pageSize = PageSize)
     {
-        int totalDice = dice.Count;
-        int totalRowPages = (totalDice + pageSize - 1) / pageSize; 
-        int totalColPages = (totalDice + MaxVisibleColumns - 1) / MaxVisibleColumns;
-        int currentRowPage = 1, currentColPage = 1;
+        int total = dice.Count;
+        int rowPage = 1, colPage = 1;
 
         while (true)
         {
             Console.Clear();
 
-            int rowStart = (currentRowPage - 1) * pageSize;
-            int rowEnd = Math.Min(rowStart + pageSize, totalDice);
-            int colStart = (currentColPage - 1) * MaxVisibleColumns;
-            int colEnd = Math.Min(colStart + MaxVisibleColumns, totalDice);
-            var headers = new string[colEnd - colStart + 1];
-            headers[0] = "User \\ Opponent";
-            
-            for (int i = 1; i < headers.Length; i++)
-                headers[i] = GetTruncatedLabel(dice[colStart + i - 1]);
+            int r0 = (rowPage - 1) * pageSize;
+            int c0 = (colPage - 1) * VisibleCols;
+
+            var rows = dice.Skip(r0).Take(pageSize).ToList();
+            var cols = dice.Skip(c0).Take(VisibleCols).ToList();
+
+            var headers = new[] { "User \\ Opponent" }
+                .Concat(cols.Select(GetTruncatedLabel)).ToArray();
 
             var table = new ConsoleTable(headers);
 
-
-            for (int row = rowStart; row < rowEnd; row++)
+            foreach (var rowDie in rows)
             {
-                var rowData = new string[headers.Length];
-                rowData[0] = GetTruncatedLabel(dice[row]);
-                Array.Fill(rowData, DefaultProbability, 1, headers.Length - 1);
-                table.AddRow(rowData);
+                var row = new[] { GetTruncatedLabel(rowDie) }
+                    .Concat(cols.Select(colDie =>
+                        ProbCalc.CalculateWinProbability(rowDie, colDie)))
+                    .ToArray();
+
+                table.AddRow(row);
             }
 
-            // Display
+            int rowPages = (total + pageSize - 1) / pageSize;
+            int colPages = (total + VisibleCols - 1) / VisibleCols;
+
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"Rows {rowStart + 1}-{rowEnd} of {totalDice} | " +
-                            $"Cols {colStart + 1}-{colEnd} of {totalDice}");
-            Console.WriteLine($"Page {currentRowPage}/{totalRowPages} (rows) | " +
-                            $"{currentColPage}/{totalColPages} (cols)");
+            Console.WriteLine($"Rows {r0 + 1}-{r0 + rows.Count} of {total} | Cols {c0 + 1}-{c0 + cols.Count} of {total}");
+            Console.WriteLine($"Page {rowPage}/{rowPages} (rows) | {colPage}/{colPages} (cols)");
             table.Write(Format.Alternative);
             Console.ResetColor();
 
-            // Navigation
             Console.WriteLine("\n[←→] Columns [↑↓] Rows [F]irst [L]ast [Q]uit");
+
             switch (Console.ReadKey(true).Key)
             {
-                case ConsoleKey.RightArrow: currentColPage = Math.Min(currentColPage + 1, totalColPages); break;
-                case ConsoleKey.LeftArrow: currentColPage = Math.Max(currentColPage - 1, 1); break;
-                case ConsoleKey.UpArrow: currentRowPage = Math.Max(currentRowPage - 1, 1); break;
-                case ConsoleKey.DownArrow: currentRowPage = Math.Min(currentRowPage + 1, totalRowPages); break;
-                case ConsoleKey.F: currentRowPage = currentColPage = 1; break;
-                case ConsoleKey.L: currentRowPage = totalRowPages; currentColPage = totalColPages; break;
+                case ConsoleKey.RightArrow: colPage = Math.Min(colPage + 1, colPages); break;
+                case ConsoleKey.LeftArrow: colPage = Math.Max(colPage - 1, 1); break;
+                case ConsoleKey.UpArrow: rowPage = Math.Max(rowPage - 1, 1); break;
+                case ConsoleKey.DownArrow: rowPage = Math.Min(rowPage + 1, rowPages); break;
+                case ConsoleKey.F: rowPage = colPage = 1; break;
+                case ConsoleKey.L:
+                    rowPage = rowPages;
+                    colPage = colPages;
+                    break;
                 case ConsoleKey.Q: return;
             }
         }
@@ -69,7 +69,6 @@ public static class TableGeneration
 
     private static string GetTruncatedLabel(Die die)
     {
-        string label = string.Join(",", die.Faces);
-        return label.Length <= MaxColumnWidth ? label : $"{label.AsSpan(0, MaxColumnWidth - 3)}...";
+        return string.Join(",", die.Faces);
     }
 }

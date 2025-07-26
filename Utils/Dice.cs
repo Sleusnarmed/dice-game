@@ -19,9 +19,9 @@ public static class DiceParser
 {
     public static List<Die> ParseDice(ReadOnlySpan<string> args)
     {
-        if (args.Length < 2)
+        if (args.Length < 3)
         {
-            throw new ArgumentException("At least 2 dice must be provided. Example: 1,2,3,4,5,6 7,8,9,10,11,12");
+            throw new ArgumentException("At least 3 dice must be provided. Example: 1,2,3,4,5,6 7,8,9,10,11,12");
         }
 
         var dice = new List<Die>(args.Length);
@@ -54,11 +54,9 @@ public static class DiceParser
         for (int i = 0; i < segments.Length; i++)
         {
             if (!int.TryParse(segments[i].Trim(), out int val) || val < 0)
-                throw new ArgumentException(
-                    $"Invalid face value: '{segments[i]}'. Must be non-negative integer");
+                throw new ArgumentException($"Invalid face value: '{segments[i]}'. Must be non-negative *integer* and can't be a letter");
             faces[i] = val;
         }
-        return faces.Length == 0 ?
-            throw new ArgumentException("Empty dice atleast should be two dice must be provided with the same faces. Example: 1,2,3,4,5,6 7,8,9,10,11,12") : faces;
+        return faces;
     }
 }
