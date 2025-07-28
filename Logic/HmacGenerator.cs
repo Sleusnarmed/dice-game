@@ -9,7 +9,6 @@ public class HmacGenerator : IDisposable
     {
         byte[] key = new byte[32];
         _rng.GetBytes(key);
-
         using var hmac = new HMACSHA3_256(key);
         return (key, hmac.ComputeHash(BitConverter.GetBytes(value)));
     }

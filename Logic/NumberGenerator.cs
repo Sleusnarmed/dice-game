@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace DiceGame.Utils;
@@ -17,8 +18,9 @@ public class NumberGenerator : HmacGenerator, INumberGenerator
 
     public async Task<(byte[] key, byte[] hmac, int value)> GenerateCommitmentAsync()
     {
-        var value = int.Parse((await _http.GetStringAsync($"http://www.randomnumberapi.com/api/v1.0/random?min={_min}&max={_max}&count=1")).Trim('[', ']'));
-        var (key, hmac) = GenerateProof(value);
+        var numbers = await _http.GetFromJsonAsync<int[]>($"http://www.randomnumberapi.com/api/v1.0/random?min={_min}&max={_max}&count=1");
+        var value = numbers?[0] ?? throw new FormatException("Invalid API response");
+        var (key, hmac) = GenerateProof(value); // Uses HMAC-SHA3-256
         return (key, hmac, value);
     }
 }
