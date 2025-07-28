@@ -14,13 +14,13 @@ public static class DiceParser
     public static List<Die> ParseDice(string[] args)
     {
         if (args.Length < 3) 
-            throw new ArgumentException("At least 3 dice must be provided");
+            throw new ArgumentException("At least 3 dice must be provided. Example: 2,2,4,4,9,9 1,1,6,6,8,8 3,3,5,5,7,7");
 
         var dice = args.Select(ParseDie).ToList();
         var faceCount = dice[0].FaceCount;
 
         if (dice.Any(d => d.FaceCount != faceCount))
-            throw new ArgumentException($"All dice must have {faceCount} faces");
+            throw new ArgumentException($"All dice must have the same faces. Example: 2,2,4,4,9,9 1,1,6,6,8,8 3,3,5,5,7,7");
 
         return dice;
     }

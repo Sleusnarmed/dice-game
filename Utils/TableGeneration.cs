@@ -43,12 +43,13 @@ public static class TableGeneration
             int rowPages = (total + pageSize - 1) / pageSize;
             int colPages = (total + VisibleCols - 1) / VisibleCols;
 
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\nHELP:\n- Guess (0) or (1) to go first\n- Select your die\n- Add your number\n- Verify cryptographic fairness");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"Rows {r0 + 1}-{r0 + rows.Count} of {total} | Cols {c0 + 1}-{c0 + cols.Count} of {total}");
             Console.WriteLine($"Page {rowPage}/{rowPages} (rows) | {colPage}/{colPages} (cols)");
             table.Write(Format.Alternative);
             Console.ResetColor();
-
             Console.WriteLine("\n[←→] Columns [↑↓] Rows [F]irst [L]ast [Q]uit");
 
             switch (Console.ReadKey(true).Key)
