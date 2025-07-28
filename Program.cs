@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Net.Http;
 using DiceGame.Utils;
+using System.Threading.Tasks;
 
 namespace DiceGame
 {
@@ -34,22 +34,24 @@ namespace DiceGame
 
                 if (playerFirst)
                 {
-                    playerDie = await PlayerSelectsDie(availableDice, dice);
+                    playerDie = PlayerSelectsDie(availableDice, dice);
                     availableDice.Remove(playerDie);
                     computerDie = availableDice[0];
+                    Console.WriteLine($"I choose [{string.Join(",", computerDie.Faces)}]");
                 }
                 else
                 {
-                    computerDie = ComputerSelectsDie(availableDice);
+                    computerDie = availableDice[0];
+                    Console.WriteLine($"I choose [{string.Join(",", computerDie.Faces)}]");
                     availableDice.Remove(computerDie);
-                    playerDie = await PlayerSelectsDie(availableDice, dice);
+                    playerDie = PlayerSelectsDie(availableDice, dice);
                 }
 
-                Console.WriteLine("LET'S ROLL SOME DICES!");
+                Console.WriteLine("\nLET'S ROLL SOME DICE!");
 
-                int compRoll = await PerformRoll(game, diceRollGen, computerDie, "Computer", dice);
-                int playerRoll = await PerformRoll(game, diceRollGen, playerDie, "Player", dice);
-
+                int compRoll = await PerformRollAsync(game, diceRollGen, computerDie, "Computer", dice);
+                int playerRoll = await PerformRollAsync(game, diceRollGen, playerDie, "Player", dice);
+                
                 Console.WriteLine($"\nComputer: {compRoll} (Die: [{string.Join(",", computerDie.Faces)}])\n" +
                                 $"Player: {playerRoll} (Die: [{string.Join(",", playerDie.Faces)}])\n" +
                                 (playerRoll > compRoll ? "You win!" :
@@ -76,17 +78,10 @@ namespace DiceGame
             }
         }
 
-        static async Task<Die> PlayerSelectsDie(List<Die> dice, List<Die> allDice) =>
+        static Die PlayerSelectsDie(List<Die> dice, List<Die> allDice) =>
             dice[ShowMenu("Choose your die:", dice.Select((d, i) => $"{i} - {string.Join(",", d.Faces)}").ToArray(), allDice)];
 
-        static Die ComputerSelectsDie(List<Die> dice)
-        {
-            var choice = dice[0];
-            Console.WriteLine($"I choose the die [{string.Join(",", choice.Faces)}]");
-            return choice;
-        }
-
-        static async Task<int> PerformRoll(DiceLogic game, INumberGenerator gen, Die die, string roller, List<Die> dice)
+        static async Task<int> PerformRollAsync(DiceLogic game, INumberGenerator gen, Die die, string roller, List<Die> dice)
         {
             Console.WriteLine($"\n{roller} roll:");
             var (key, hmac, compChoice) = await gen.GenerateCommitmentAsync();
