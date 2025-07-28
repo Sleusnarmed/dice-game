@@ -1,56 +1,42 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Net.Http;
 using DiceGame.Utils;
-using System.Threading.Tasks;
 
 namespace DiceGame
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             try
             {
-                using var http = new HttpClient();
                 var dice = DiceParser.ParseDice(args);
-
-                using var firstMoveGen = new NumberGenerator(http, 0, 50);
-                using var diceRollGen = new NumberGenerator(http, 0, 5);
+                using var firstMoveGen = new SecureIntGen(0, 2);
+                using var diceRollGen = new SecureIntGen(0, 6);
                 var game = new DiceLogic();
 
                 Console.WriteLine("Let's determine who makes the first move.");
-                var (key, hmac, num) = await firstMoveGen.GenerateCommitmentAsync();
-                int firstMoveValue = num % 2;
+                var (key, hmac, num) = firstMoveGen.GenerateCommitment();
+
                 Console.WriteLine($"HMAC: {Convert.ToHexString(hmac)}");
 
                 int guess = ShowMenu("Try to guess my selection:", new[] { "0 - 0", "1 - 1" }, dice);
-                Console.WriteLine($"Your selection: {guess}\nMy selection: {firstMoveValue} \n(KEY={Convert.ToHexString(key)})");
-                bool playerFirst = guess == firstMoveValue;
+                Console.WriteLine($"Your selection: {guess}\nMy selection: {num} \n(KEY={Convert.ToHexString(key)})");
+                bool playerFirst = guess == num;
 
                 var availableDice = dice.ToList();
-                Die playerDie, computerDie;
+                Die playerDie = playerFirst 
+                    ? PlayerSelectsDie(availableDice, dice) 
+                    : availableDice[0];
+                Die computerDie = playerFirst 
+                    ? availableDice[0] 
+                    : PlayerSelectsDie(availableDice, dice);
 
-                if (playerFirst)
-                {
-                    playerDie = PlayerSelectsDie(availableDice, dice);
-                    availableDice.Remove(playerDie);
-                    computerDie = availableDice[0];
-                    Console.WriteLine($"I choose [{string.Join(",", computerDie.Faces)}]");
-                }
-                else
-                {
-                    computerDie = availableDice[0];
-                    Console.WriteLine($"I choose [{string.Join(",", computerDie.Faces)}]");
-                    availableDice.Remove(computerDie);
-                    playerDie = PlayerSelectsDie(availableDice, dice);
-                }
+                Console.WriteLine($"\nLET'S ROLL SOME DICE!\nI choose [{string.Join(",", computerDie.Faces)}]");
 
-                Console.WriteLine("\nLET'S ROLL SOME DICE!");
-
-                int compRoll = await PerformRollAsync(game, diceRollGen, computerDie, "Computer", dice);
-                int playerRoll = await PerformRollAsync(game, diceRollGen, playerDie, "Player", dice);
+                int compRoll = PerformRoll(game, diceRollGen, computerDie, "Computer", dice);
+                int playerRoll = PerformRoll(game, diceRollGen, playerDie, "Player", dice);
                 
                 Console.WriteLine($"\nComputer: {compRoll} (Die: [{string.Join(",", computerDie.Faces)}])\n" +
                                 $"Player: {playerRoll} (Die: [{string.Join(",", playerDie.Faces)}])\n" +
@@ -65,15 +51,11 @@ namespace DiceGame
             while (true)
             {
                 Console.WriteLine($"{prompt}\n{string.Join("\n", options)}\nX - exit\nH - help");
-                Console.Write("Your selection: ");
                 var input = Console.ReadLine()?.ToUpper();
-
                 if (input == "X") Environment.Exit(0);
                 if (input == "H") { TableGeneration.DisplayDiceTable(dice); continue; }
-
                 if (int.TryParse(input, out int choice) && choice >= 0 && choice < options.Length)
                     return choice;
-
                 Console.WriteLine("Invalid input. Please try again.");
             }
         }
@@ -81,21 +63,19 @@ namespace DiceGame
         static Die PlayerSelectsDie(List<Die> dice, List<Die> allDice) =>
             dice[ShowMenu("Choose your die:", dice.Select((d, i) => $"{i} - {string.Join(",", d.Faces)}").ToArray(), allDice)];
 
-        static async Task<int> PerformRollAsync(DiceLogic game, INumberGenerator gen, Die die, string roller, List<Die> dice)
+        static int PerformRoll(DiceLogic game, SecureIntGen gen, Die die, string roller, List<Die> dice)
         {
             Console.WriteLine($"\n{roller} roll:");
-            var (key, hmac, compChoice) = await gen.GenerateCommitmentAsync();
+            var (key, hmac, compChoice) = gen.GenerateCommitment();
             Console.WriteLine($"HMAC: {Convert.ToHexString(hmac)}");
 
             int input = ShowMenu("Add your number:", Enumerable.Range(0, die.FaceCount).Select(i => $"{i} - {i}").ToArray(), dice);
-
             var (combinedIndex, _) = game.RollDie(die, input, compChoice);
-            int faceIndex = (combinedIndex + input) % die.FaceCount;
-            int faceValue = die.Faces[faceIndex];
+            int faceValue = die.Faces[(combinedIndex + input) % die.FaceCount];
 
-            Console.WriteLine($"My number: {combinedIndex} (KEY={Convert.ToHexString(key)})");
-            Console.WriteLine($"Fair result: ({combinedIndex} + {input}) % {die.FaceCount} = {faceIndex}");
-            Console.WriteLine($"Die face value: {faceValue}");
+            Console.WriteLine($"My number: {combinedIndex} (KEY={Convert.ToHexString(key)})\n" +
+                            $"Fair result: ({combinedIndex} + {input}) % {die.FaceCount} = {(combinedIndex + input) % die.FaceCount}\n" +
+                            $"Die face value: {faceValue}");
 
             return faceValue;
         }
